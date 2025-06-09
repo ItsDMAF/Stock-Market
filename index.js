@@ -4,9 +4,13 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const jwtStrategy = require("./Security/jwtStrategy");
+const WebsocketConnector = require("./Websocket/connector")
+const startGateway = require('./Websocket/gateway');
+const http = require('http');
 const cors = require('cors');
 
 dotenv.config();
+const server = http.createServer(app);
 
 const port = process.env._PORT || 8080;
 
@@ -27,9 +31,11 @@ app.get('/api/user/me', passport.authenticate('jwt', { session: false }), (req, 
 
 mongoose.connect(process.env.Mongo_URL)
   .then(() => {
-    console.log("connect successfully");
-    app.listen(port, () => {
-      console.log(`app running on port ${port}`);
-    });
+    console.log("DB connect successfully");
   })
   .catch(err => console.error("MongoDB connection error:", err));
+
+  server.listen(port, () => {
+      console.log(`app running on port ${port}`);
+    });
+startGateway(server);
